@@ -11,7 +11,7 @@ We release weights of our specialized model at https://drive.google.com/file/d/1
 ### Train a new model
 
 ```shell
-accelerate launch specialize_general.py \
+accelerate launch specialize.py \
 --instance_data_dir 'specialization_data/training_images' \
 --instance_age_path 'specialization_data/training_ages.npy' \
 --output_dir <PATH_TO_SAVE_MODEL> \

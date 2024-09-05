@@ -72,7 +72,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--pretrained_model_name_or_path",
         type=str,
-        default="runwayml/stable-diffusion-v1-5",
+        default="bdsqlsz/stable-diffusion-v1-5",
         required=False,
         help="Path to pretrained model or model identifier from huggingface.co/models.",
     )
@@ -824,8 +824,9 @@ if __name__ == "__main__":
 
     # args.instance_data_dir = 'specialization_data/training_images'
     # args.instance_age_path = 'specialization_data/training_ages.npy'
-    #
+    # #
     # args.output_dir = 'specialized_models/tmp'
+    # args.max_train_steps = 150
 
     main(args)
 
