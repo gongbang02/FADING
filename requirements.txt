@@ -1,5 +1,0 @@
-accelerate
-Pillow
-diffusers
-transformers
-torchvision

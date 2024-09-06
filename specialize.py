@@ -824,8 +824,9 @@ if __name__ == "__main__":
 
     # args.instance_data_dir = 'specialization_data/training_images'
     # args.instance_age_path = 'specialization_data/training_ages.npy'
-    #
+    # #
     # args.output_dir = 'specialized_models/tmp'
+    # args.max_train_steps = 150
 
     main(args)
 
