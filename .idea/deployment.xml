@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="gongbang@zidane.cs.unc.edu:22 password" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="gongbang@casillas.cs.unc.edu:22 password" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+    <option name="confirmBeforeUploading" value="false" />
     <serverData>
+      <paths name="gongbang@casillas.cs.unc.edu:22 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/playpen-nas-ssd3/gongbang/FADING" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="gongbang@hires-gpu2.cs.unc.edu:22 password">
         <serverdata>
           <mappings>
@@ -86,7 +94,21 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="gongbang@mbappe.cs.unc.edu:22 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/playpen-nas-ssd3/gongbang/FADING" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="gongbang@zidane.cs.unc.edu:22 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/playpen-nas-ssd3/gongbang/FADING" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="gongbang@zidane.cs.unc.edu:22 password (2)">
         <serverdata>
           <mappings>
             <mapping deploy="/playpen-nas-ssd3/gongbang/FADING" local="$PROJECT_DIR$" />

@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="fading" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="fading" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.12.4 (sftp://gongbang@casillas.cs.unc.edu:22/playpen-nas-ssd/gongbang/miniconda3/envs/fading/bin/python)" project-jdk-type="Python SDK" />
 </project>

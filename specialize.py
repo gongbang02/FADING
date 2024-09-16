@@ -9,6 +9,7 @@ import logging
 import math
 import numpy as np
 from PIL import Image
+import wandb
 
 try:
     from torchvision.transforms import InterpolationMode
@@ -38,6 +39,8 @@ from huggingface_hub import HfFolder, Repository, whoami
 from torchvision import transforms
 from tqdm.auto import tqdm
 from transformers import AutoTokenizer, PretrainedConfig
+import lpips
+
 
 #%%
 
@@ -45,6 +48,8 @@ from transformers import AutoTokenizer, PretrainedConfig
 # check_min_version("0.10.0.dev0")
 
 logger = get_logger(__name__)
+
+wandb.init(project="FADING")
 
 
 def import_model_class_from_model_name_or_path(pretrained_model_name_or_path: str, revision: str):
@@ -72,7 +77,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--pretrained_model_name_or_path",
         type=str,
-        default="runwayml/stable-diffusion-v1-5",
+        default="botp/stable-diffusion-v1-5",
         required=False,
         help="Path to pretrained model or model identifier from huggingface.co/models.",
     )
@@ -428,7 +433,6 @@ def collate_fn(examples, finetune_mode="finetune_double_prompt"):
     pixel_values += [example["instance_images"] for example in examples]
 
     pixel_values_ages = [example["instance_image_age"] for example in examples]
-
     pixel_values = torch.stack(pixel_values)
     pixel_values = pixel_values.to(memory_format=torch.contiguous_format).float()
 
@@ -667,6 +671,8 @@ def main(args):
     if not args.train_text_encoder:
         text_encoder.to(accelerator.device, dtype=weight_dtype)
 
+    lpips_loss_fn = lpips.LPIPS(net='vgg').to(accelerator.device)
+
     low_precision_error_string = (
         "Please make sure to always have all model weights in full float32 precision when starting training - even if"
         " doing mixed precision training. copy of the weights should still be float32."
@@ -779,8 +785,22 @@ def main(args):
                 # noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
                 pred_noisy_latents = noise_scheduler.add_noise(latents, model_pred.to(dtype=weight_dtype), timesteps)
 
-                loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
-                instance_loss = loss
+                diffusion_loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
+                with torch.no_grad():
+                    output_latents = 1 / 0.18215 * pred_denoised_latents.detach()
+                    pred_image = vae.decode(output_latents, return_dict=True)['sample'][0]
+                    pred_image = (pred_image / 2 + 0.5).clamp(0, 1) * 255
+
+                    pred_img = pred_image.cpu().permute(1, 2, 0).numpy()
+                    pred_img = pred_img.astype(np.uint8)
+
+                    pred_img = wandb.Image(pred_img)
+                l2_loss = F.mse_loss(pred_image, batch["pixel_values"][0]).mean()
+                lpips_loss = lpips_loss_fn(pred_image, batch["pixel_values"][0]).mean()
+                instance_loss = diffusion_loss + 2.5e-5 * l2_loss + lpips_loss
+                accelerator.backward(instance_loss)
+                optimizer.step()
+                optimizer.zero_grad()
 
             # Checks if the accelerator has performed an optimization step behind the scenes
             if accelerator.sync_gradients:
@@ -793,9 +813,14 @@ def main(args):
                         accelerator.save_state(save_path)
                         logger.info(f"Saved state to {save_path}")
 
-            logs = {"loss": loss.detach().item(),
+            logs = {"diffusion_loss": diffusion_loss.detach().item(),
+                    "l2_loss": l2_loss.detach().item(),
+                    "lpips_loss": lpips_loss.detach().item(),
                     "instance_loss": instance_loss.detach().item(),
-                    "lr": lr_scheduler.get_last_lr()[0]}
+                    "lr": lr_scheduler.get_last_lr()[0],
+                    "predicted_image": pred_img}
+
+            wandb.log(logs)
 
             progress_bar.set_postfix(**logs)
             accelerator.log(logs, step=global_step)
